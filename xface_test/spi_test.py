@@ -24,6 +24,7 @@ import datetime
 
 
 # Control table address
+ADDR_DATA_LENGTH           = 25
 ADDR_STATUS_A              = 35
 ADDR_BUF_A                 = 26
 ADDR_SPI_ENABLE            = 29
@@ -88,7 +89,7 @@ else:
 
 buf = [77, 10, 2, 5, 8]
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 25, len(buf))
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(buf))
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
