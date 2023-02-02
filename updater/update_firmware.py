@@ -223,7 +223,7 @@ class SensorUpdater(object):
             for i in range(fullPacks):
                 data = [i]
                 for j in range(maxDataSize):
-                    data.append(bytearray(fileData)[j])
+                    data.append(bytearray(fileData)[offset])
                     offset += 1
                 #print(data)
                 dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, 0, len(data), data)
