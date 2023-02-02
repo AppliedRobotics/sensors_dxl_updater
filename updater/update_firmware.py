@@ -177,7 +177,7 @@ class SensorUpdater(object):
         # send the public key
         data = []# list(public_key)
         for i in range(16):
-            data.append(struct.unpack('B', public_key[i])[0])
+            data.append(bytearray(public_key)[i])
 
         dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, 1, len(data), data)
         if dxl_comm_result != COMM_SUCCESS:
@@ -193,7 +193,7 @@ class SensorUpdater(object):
 
 
 
-        print 'Getting device Model ... ',
+        print ('Getting device Model ... '),
         data, dxl_comm_result, dxl_error = packetHandler.readTxRx(portHandler, DXL_ID, 0,  1)
         dynamixel_model = -1
         if dxl_comm_result != COMM_SUCCESS:
@@ -213,7 +213,7 @@ class SensorUpdater(object):
         try:
             sns = sensor_classifier.get_by_model_number(dynamixel_model)
         except:
-            print 'Unknown sensor, use default firmware!'
+            print ('Unknown sensor, use default firmware!')
 #            lcd.info('Unknown sensor use default fw')
             sns = sensor_classifier.get_dummy(dynamixel_model)
             pass
@@ -223,16 +223,16 @@ class SensorUpdater(object):
 
         fileName = sns.firmware
         print(sns.name),
-        print ' ' ,
+        print (' ') ,
         print(sns.model_number)
         #fileName = 'encrypted_stm8_ball.bin'
 
-        print 'Firmware ',
+        print ('Firmware '),
         print(fileName)
         input_file = open(fileName, 'rb')
         fileData = input_file.read()
         input_file.close()
-        print 'Firmware size ',
+        print ('Firmware size '),
         print (len(fileData))
         maxDataSize = 64
         fullPacks = len(fileData) // maxDataSize
@@ -244,7 +244,7 @@ class SensorUpdater(object):
             for i in range(fullPacks):
                 data = [i]
                 for j in range(maxDataSize):
-                    data.append(struct.unpack('B', fileData[offset])[0])
+                    data.append(bytearray(fileData)[j])
                     offset += 1
                 #print(data)
                 dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, 0, len(data), data)
@@ -259,7 +259,7 @@ class SensorUpdater(object):
                     #print("Dynamixel has been successfully connected")
                     #print(i)
                     sys.stdout.write('.')
-        print 'Succeeded!'
+        print ('Succeeded!')
 #        lcd.info('Succeeded!')
 
         time.sleep(0.5)
@@ -276,7 +276,7 @@ class SensorUpdater(object):
             print("Dynamixel has been successfully connected")
             #lcd.info('Dynamixel connected')
 
-        print 'Reset device'
+        print ('Reset device')
 #        lcd.info('Reset device')  
         packetHandler.write1ByteTxRx(portHandler, DXL_ID, 23, 0)
         time.sleep(0.1)

@@ -100,6 +100,7 @@ mixed_buf = []
 status = [0]
 
 try:
+    os.system('../rs485 /dev/ttyS2 1')
     while 1:
         status = dacPH.rxPacket(portHandler)                        #Read status
         if status == [BUF_A_READY]:                                         #250 = 0xFA, write to 1st buffer

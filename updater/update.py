@@ -10,23 +10,6 @@ from update_firmware import SensorUpdater
 ON = True
 OFF = False
 
-def syscmd(cmd):
-	#return os.popen(cmd).read()
-	s = ''
-	try:
-		s = check_output(cmd, shell = True, stderr = STDOUT)
-	except:
-		s = 'err'
-
-	return s
-
-class Button(object):
-	def __init__(self):
-		syscmd("echo 3 > /sys/class/gpio/export")
-		syscmd("echo in > /sys/class/gpio/gpio3/direction")
-	def get(self):
-		self.log = syscmd("cat /sys/class/gpio/gpio3/value")
-		return self.log.find("0") >= 0
 
 def set_led(port, val):
 	if val:
@@ -65,12 +48,13 @@ class SensorDxlUpdate(object):
 		pass
 
 	def run(self):
+		os.system('../rs485  /dev/ttyS2  1')
 		ser = serial.Serial('/dev/ttyS1', 115200, timeout=1)
 #		lcd = test_lcd.Lcd(ser)
 		set_led(ser, 1)
 		#lcd.beeptest()
 #		lcd.beep(ON)
-		print 'start'
+		print ('start')
 
 		#su = SensorUpdater()
 		#su.test('/dev/ttyACM0', 0x15, ser, lcd)
@@ -78,16 +62,19 @@ class SensorDxlUpdate(object):
 		set_led(ser, 0)
 
 		su = SensorUpdater()
-		#su.update('/dev/ttyACM0', 'public_key.txt', ser, lcd)
-		try:
-			if su.update('/dev/ttyS2', 'public_key.txt', ser) < 0:
-				print 'Error: can\'t update firmware'
+
+		su.update('/dev/ttyS2', 'public_key.txt', ser)
+
+    #su.update('/dev/ttyACM0', 'public_key.txt', ser, lcd)
+#		try:
+#			if su.update('/dev/ttyS2', 'public_key.txt', ser) < 0:
+#				print 'Error: can\'t update firmware'
 #				lcd.dialog('Error: can\'t update firmware', right_btn = ' RESET ', beep = True)
-				return
-		except:
-			print 'Error: can\'t update firmware with exception'
+#				return
+#		except:
+#			print 'Error: can\'t update firmware with exception'
 #			lcd.dialog('Error: can\'t update firmware with exception', right_btn = ' RESET ', beep = True)
-			return
+#			return
 
 		print('Firmware updated!')
 #		lcd.info('Firmware updated!') 

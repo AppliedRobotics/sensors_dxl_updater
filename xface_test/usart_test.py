@@ -35,7 +35,7 @@ PROTOCOL_VERSION            = 1.0               # See which protocol version is 
 # Default setting
 DXL_ID                      = 161                 # Dynamixel ID : 1
 BAUDRATE                    = 1000000             # Dynamixel default baudrate : 1000000
-DEVICENAME                  = 'COM31'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/ttyS2'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 
@@ -53,6 +53,7 @@ packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 
 # Open port
+os.system('../rs485  /dev/ttyS2  1')
 if portHandler.openPort():
     print("Succeeded to open the port")
 else:
