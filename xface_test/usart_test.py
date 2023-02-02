@@ -26,9 +26,9 @@ import datetime
 # Control table address
 ADDR_STATUS_A              = 35
 ADDR_BUF_A                 = 26
-ADDR_USART_ENABLE            = 29
+ADDR_USART_ENABLE          = 29
 ADDR_MODE_SELECT           = 28
-
+ADDR_DATA_LENGTH           = 25
 # Protocol version
 PROTOCOL_VERSION            = 1.0               # See which protocol version is used in the Dynamixel
 
@@ -43,7 +43,7 @@ USART_BUF_SIZE                = 64
 USART_WRITE                   = 2                 # Value for enabling the dac
 USART_READ                    = 1                 # Value for disabling the dac
 MODE_USART                    = 36
-DATA_LENGTH                   = 25
+
 
 SETTINGS = 34
 
@@ -80,12 +80,21 @@ elif dxl_error != 0:
 else:
     print("Mode selected")
 
+time.sleep(0.5)
 
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, SETTINGS, 0b10001000)
+if dxl_comm_result != COMM_SUCCESS:
+    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+elif dxl_error != 0:
+    print("%s" % packetHandler.getRxPacketError(dxl_error))
+else:
+    print("Settings installed")
 
+time.sleep(0.5)
 
 buf = [1, 2, 3]
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 25, len(buf))
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(buf))
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
@@ -101,7 +110,7 @@ elif dxl_error != 0:
 else:
     print("buf sent")
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 29, 2)
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_USART_ENABLE, 2)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
