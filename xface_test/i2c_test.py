@@ -21,8 +21,6 @@ else:
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 import datetime
 
-
-
 # Control table address
 ADDR_STATUS_A              = 35
 ADDR_BUF_A                 = 26
@@ -35,7 +33,7 @@ PROTOCOL_VERSION            = 1.0               # See which protocol version is 
 # Default setting
 DXL_ID                      = 161                 # Dynamixel ID : 1
 BAUDRATE                    = 1000000             # Dynamixel default baudrate : 1000000
-DEVICENAME                  = 'COM31'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/ttyS2'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 
@@ -52,6 +50,7 @@ packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 
 # Open port
+os.system('../rs485  /dev/ttyS2  1')
 if portHandler.openPort():
     print("Succeeded to open the port")
 else:
@@ -93,9 +92,6 @@ elif dxl_error != 0:
 else:
     print("Mode selected")
 
-
-
-
 buf = [119, 1, 3, 1, 2, 3]
 
 dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(buf), buf)
@@ -103,7 +99,6 @@ if dxl_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-
 
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_I2C_ENABLE, I2C_WRITE)
 if dxl_comm_result != COMM_SUCCESS:
@@ -120,7 +115,6 @@ if dxl_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-
 
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_I2C_ENABLE, I2C_WRITE)
 if dxl_comm_result != COMM_SUCCESS:
