@@ -4,7 +4,7 @@ import argparse
 import struct
 import time
 import sys
-#import test_lcd
+import os
 
 # Protocol version
 PROTOCOL_VERSION        = 1.0               # See which protocol version is used in the Dynamixel
@@ -88,7 +88,7 @@ class SensorClassifier(object):
         self.sns.append(SensorDescription(MODEL_XFACE,     'ULTRASONIC',      'encrypted_stm8-ultrasonic.bin', 1))
         self.sns.append(SensorDescription(MODEL_ZIGBEE,    'ZIGBEE',     'encrypted_stm8-zigbrd.bin', 1))
         self.sns.append(SensorDescription(MODEL_AX_S1,    'AX_S1', 0, 1))
-        
+
     def get_by_model_number(self, model_number):
         for x in self.sns:
             if x.model_number == model_number:
@@ -102,31 +102,29 @@ class SensorClassifier(object):
 
 sensor_classifier = SensorClassifier()
 
-
 class SensorUpdater(object):
     def __init__(self):
         pass
 
-    def update(self, port, file_with_public_key, ser):
+    def update(self, port, file_with_public_key):
+        print('Starting...')
+        os.system('../rs485  /dev/ttyS2  1')
         portHandler = PortHandler(port)
         print("UPDATE")
-#        lcd.stage('2.Update')
+
         # Open port
         if portHandler.openPort():
             print('Succeeded to open the port')
-#            lcd.info('Succeeded to open the port')
         else:
             print('Failed to open the port')
-#            lcd.error('Failed to open the port')
             return -10
+
         # Set port baudrate
         time.sleep(0.1);
         if portHandler.setBaudRate(BAUDRATE):
             print('Succeeded to change the baudrate') 
-#            lcd.info('Succeeded to change the baudrate')
         else:
             print('Failed to change the baudrate')
-#            lcd.error('Failed to change the baudrate')        
             return -12
 
         file_with_public_key = open(file_with_public_key, 'rb')
@@ -139,20 +137,16 @@ class SensorUpdater(object):
         time.sleep(0.1);
         if portHandler.setBaudRate(57600):
             print('Succeeded to change the baudrate')
-#            lcd.info('Succeeded to change the baudrate') 
         else:
             print('Failed to change the baudrate')
-#            lcd.error('Failed to change the baudrate')  
             return -14
         packetHandler.write1ByteTxRx(portHandler, 0xFE, 23, 0)
         time.sleep(0.1)
 
         if portHandler.setBaudRate(BAUDRATE):
             print('Succeeded to change the baudrate')
-#            lcd.info('Succeeded to change the baudrate') 
         else:
             print('Failed to change the baudrate')
-#            lcd.error('Failed to change the baudrate')  
             return -16
         packetHandler.write1ByteTxRx(portHandler, 0xFE, 23, 0)
         time.sleep(0.1)
@@ -160,20 +154,12 @@ class SensorUpdater(object):
         # stop running
 
         print("Waiting for DXL")
-#        lcd.info('Waiting for DXL ...') 
-#        lcd.act('Connect 3-Pin DXL->DUT!')
-#        lcd.draw_buttons(label_right = ' reset ', color_right = 6, color_left = 0)
-        while True:     
+        while True:
             dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 0, 0)
             if dxl_comm_result == COMM_SUCCESS:
                 print("Sensor found")
-#                lcd.info('Sensor found')
                 break
-#            if lcd.check_buttons():
- #               return -17
- #           lcd.act_blink()
 
-           
         # send the public key
         data = []# list(public_key)
         for i in range(16):
@@ -189,9 +175,6 @@ class SensorUpdater(object):
             return -20
         else:
             print("Dynamixel has been successfully connected")
-#            lcd.info('Dynamixel connected')
-
-
 
         print ('Getting device Model ... '),
         data, dxl_comm_result, dxl_error = packetHandler.readTxRx(portHandler, DXL_ID, 0,  1)
@@ -206,7 +189,6 @@ class SensorUpdater(object):
         else:
             dynamixel_model = data[0]
             print("Dynamixel model is %d" % dynamixel_model)
-            #lcd.info('rDynamixel model is ' + bytearray([dynamixel_model]))
 
         fileName = 'encrypted_stm8_ball.bin'
 
@@ -214,10 +196,8 @@ class SensorUpdater(object):
             sns = sensor_classifier.get_by_model_number(dynamixel_model)
         except:
             print ('Unknown sensor, use default firmware!')
-#            lcd.info('Unknown sensor use default fw')
             sns = sensor_classifier.get_dummy(dynamixel_model)
             pass
-            #return -22
 
         self.model_number = sns.model_number
 
@@ -225,7 +205,6 @@ class SensorUpdater(object):
         print(sns.name),
         print (' ') ,
         print(sns.model_number)
-        #fileName = 'encrypted_stm8_ball.bin'
 
         print ('Firmware '),
         print(fileName)
@@ -260,7 +239,6 @@ class SensorUpdater(object):
                     #print(i)
                     sys.stdout.write('.')
         print ('Succeeded!')
-#        lcd.info('Succeeded!')
 
         time.sleep(0.5)
 
@@ -274,10 +252,8 @@ class SensorUpdater(object):
             return -26
         else:
             print("Dynamixel has been successfully connected")
-            #lcd.info('Dynamixel connected')
 
         print ('Reset device')
-#        lcd.info('Reset device')  
         packetHandler.write1ByteTxRx(portHandler, DXL_ID, 23, 0)
         time.sleep(0.1)
         portHandler.closePort()
@@ -287,15 +263,16 @@ class SensorUpdater(object):
     def get_model_number(self):
         return self.model_number
 
+su = SensorUpdater()
+#su.update('/dev/ttyS2', 'public_key.txt')
+
 try:
-    su = SensorUpdater()
-    #while 1:
-    #su.update('/dev/ttyACM0', 'public_key.txt')
-    time.sleep(0.2)
+  if su.update('/dev/ttyS2', 'public_key.txt') < 0:
+    print ('Error: can\'t update firmware')
+  else:
+    print('Firmware updated!')
+except:
+    print ('Error: can\'t update firmware with exception')
 
-    time.sleep(3)
-    #su.test('/dev/ttyACM0', su.get_model_number())
-
-except KeyboardInterrupt:
-    # quit
-    sys.exit()
+time.sleep(2.5)
+sys.exit()
