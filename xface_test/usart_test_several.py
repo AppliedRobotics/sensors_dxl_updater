@@ -42,7 +42,7 @@ ADDR_STATUS_A               = 35
 # XFACE settings
 
 MODE_USART                  = 36
-USART_SETTINGS              = 0b00010000
+USART_SETTINGS              = 0b10010000
 
 # Script settings
 
