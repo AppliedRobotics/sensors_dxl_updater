@@ -42,12 +42,12 @@ ADDR_STATUS_A               = 35
 # XFACE settings
 
 MODE_USART                  = 36
-USART_SETTINGS              = 0b10010000
+USART_SETTINGS              = 0b00010000
 
 # Script settings
 
 DEVICE_NUMBER               = 2
-txbuf                       = [0xAA, 0x11]
+txbuf                       = [0x01, 0x02, 0x03]
 
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
