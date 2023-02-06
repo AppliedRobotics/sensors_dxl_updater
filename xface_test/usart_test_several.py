@@ -74,6 +74,53 @@ def port_open():
         quit()
     print("")
 
+####################### SHOW INFO ####################################
+
+def show_info():
+    print("INTERFACE SETTINGS:")
+    print("")
+    print("Number of devices:", DEVICE_NUMBER)
+
+    print ("")
+    if(USART_SETTINGS & 0b10000000):
+        print ("MODE: USART")
+        print("CPOL =", (USART_SETTINGS & 0b00000001))
+        print("CPHA =", ((USART_SETTINGS & 0b00000010)>>1))
+    else:
+        print ("MODE: UART")
+    
+    print ("")
+    print("BAUDRATE:")
+
+    if    (USART_SETTINGS & 0b00001000):
+        print ("9600")
+    elif  (USART_SETTINGS & 0b00010000):
+        print ("19200")
+    elif ((USART_SETTINGS & 0b00011000) == 0b00011000):
+        print ("57600")
+    elif  (USART_SETTINGS & 0b00100000):
+        print ("115200")
+    elif ((USART_SETTINGS & 0b00101000) == 0b00101000):
+        print ("200000")
+    elif ((USART_SETTINGS & 0b00110000) == 0b00110000):
+        print ("250000")
+    elif ((USART_SETTINGS & 0b00111000) == 0b00111000):
+        print ("400000")
+    elif  (USART_SETTINGS & 0b01000000):
+        print ("500000")
+    elif ((USART_SETTINGS & 0b01001000) == 0b01001000):
+        print ("1000000")
+
+    print ("")
+    print ("WORD LENGTH:")
+    
+    if(USART_SETTINGS & 0b00000100):
+        print ("9 BIT")
+    else:
+        print ("8 BIT")
+
+    print ("")
+
 ####################### SET DEFAULT IDs ##############################
 def set_def_id():
     out_flag = 0
@@ -190,6 +237,7 @@ def usart_send():
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
     
+
     print("TX buffer set for DEVICE 1:", txbuf)
 
     dxl_comm_result = 1
@@ -212,12 +260,14 @@ def  usart_read():
     dev_id = DXL_ID+1
     while dev_id < DXL_ID+DEVICE_NUMBER:
         dev_id += 1
-        bytes_count = 0
-        while bytes_count < len(txbuf):
-            rxbuf.append(packetHandler.read1ByteTxRx(portHandler, 163, (ADDR_BUF_A + bytes_count))[0])
-#            rxbuf.pop()
-#            rxbuf.pop()
-            bytes_count += 1
+        dxl_comm_result = 1
+        while dxl_comm_result != COMM_SUCCESS:
+            rxbuf, dxl_comm_result, dxl_error = packetHandler.readTxRx(portHandler, dev_id, ADDR_BUF_A, len(txbuf))
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
+
         print("RX buffer of DEVICE", dev_id - DXL_ID, ":", rxbuf)
 
     if rxbuf == txbuf:
@@ -229,6 +279,7 @@ def  usart_read():
 
 try:
     port_open()
+    show_info()
     id_set()
     usart_set()
     usart_send()
