@@ -41,8 +41,9 @@ ADDR_STATUS_A               = 35
 
 # XFACE settings
 
-MODE_USART                  = 36
-USART_SETTINGS              = 0b00010000
+MODE_UART_USARTM            = 36
+MODE_USART_SLAVE            = 37
+USART_SETTINGS              = 0b10010000
 
 # Script settings
 
@@ -123,26 +124,23 @@ def show_info():
 
 ####################### SET DEFAULT IDs ##############################
 def set_def_id():
-    out_flag = 0
-    while True:
-        dev_id = DXL_ID
-        while dev_id < (DXL_ID+DEVICE_NUMBER):
-            dev_id += 1
-            
+
+    dev_id = DXL_ID
+    while dev_id < (DXL_ID+DEVICE_NUMBER):
+        dev_id += 1
+        
+        dxl_comm_result = 1
+        while dxl_comm_result != COMM_SUCCESS:
             dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, 0, 0)
-            if dxl_comm_result == COMM_SUCCESS:
-                print("DEVICE", (dev_id-DXL_ID), "found")
-                dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, ADDR_DEV_ID, DXL_ID)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
-                else:
-                    print("Set default ID:", DXL_ID, "for DEVICE", (dev_id-DXL_ID))
-                    out_flag += 1
-                    break
-        if out_flag == DEVICE_NUMBER:
-            break
+
+        print("DEVICE", (dev_id-DXL_ID), "found")
+            
+        dxl_comm_result = 1
+        while dxl_comm_result != COMM_SUCCESS:
+            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, ADDR_DEV_ID, DXL_ID)
+
+        print("Set default ID:", DXL_ID, "for DEVICE", (dev_id-DXL_ID))
+    
     #dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, BROADCAST_ID, ADDR_DEV_ID, DXL_ID)
     print("Disconnect devices")
     print("")
@@ -164,11 +162,7 @@ def id_set():
             dxl_comm_result = 1
             while dxl_comm_result != COMM_SUCCESS:
                 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DEV_ID, dev_id)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
-                    
+                
             print("Set ID:", (dev_id), "for DEVICE", (dev_id-DXL_ID))
             break
 
@@ -179,34 +173,37 @@ def id_set():
 
 
 def usart_set():
+
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID+1 , ADDR_MODE_SELECT, MODE_UART_USARTM)
+
+    dev_id = DXL_ID
+    dev_id += 1
+    while dev_id < DXL_ID + DEVICE_NUMBER:
+        dev_id += 1
+        dxl_comm_result = 1
+        while dxl_comm_result != COMM_SUCCESS:
+            if(USART_SETTINGS & 0b10000000):
+                dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id , ADDR_MODE_SELECT, MODE_USART_SLAVE)
+            else:
+                dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id , ADDR_MODE_SELECT, MODE_UART_USARTM)
+    
+        print("Mode selected for DEVICE", (dev_id-DXL_ID))
+    
+    time.sleep(0.5)
+
     dev_id = DXL_ID
     while dev_id < DXL_ID + DEVICE_NUMBER:
         dev_id += 1
-        
-
-        dxl_comm_result = 1
-        while dxl_comm_result != COMM_SUCCESS:
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, ADDR_MODE_SELECT, MODE_USART)
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-            if dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
-    
-        print("Mode selected for DEVICE", (dev_id-DXL_ID))
-        
-        time.sleep(0.5)
 
         dxl_comm_result = 1
         while dxl_comm_result != COMM_SUCCESS:
             dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, ADDR_SETTINGS, USART_SETTINGS)
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
         
         print("Settings installed for DEVICE", (dev_id-DXL_ID))
 
-        time.sleep(1)
+    time.sleep(1)
 
     print("")
 
@@ -220,10 +217,6 @@ def usart_send():
         dxl_comm_result = 1
         while dxl_comm_result != COMM_SUCCESS:
             dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dev_id, ADDR_DATA_LENGTH, len(txbuf))
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
             
         print("Length set for DEVICE", (dev_id-DXL_ID))
 
@@ -232,21 +225,12 @@ def usart_send():
     dxl_comm_result = 1
     while dxl_comm_result != COMM_SUCCESS:
         dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID + 1, ADDR_BUF_A, len(txbuf), txbuf)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
     
-
     print("TX buffer set for DEVICE 1:", txbuf)
 
     dxl_comm_result = 1
     while dxl_comm_result != COMM_SUCCESS:
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, BROADCAST_ID, ADDR_USART_ENABLE, 2)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
     
     print("")
     print("Start transmitting")
@@ -263,10 +247,6 @@ def  usart_read():
         dxl_comm_result = 1
         while dxl_comm_result != COMM_SUCCESS:
             rxbuf, dxl_comm_result, dxl_error = packetHandler.readTxRx(portHandler, dev_id, ADDR_BUF_A, len(txbuf))
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
 
         print("RX buffer of DEVICE", dev_id - DXL_ID, ":", rxbuf)
 
