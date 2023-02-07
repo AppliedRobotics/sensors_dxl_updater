@@ -114,7 +114,7 @@ except KeyboardInterrupt:
 
     dxl_comm_result = 1
     while dxl_comm_result != COMM_SUCCESS:
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH1_EN, 1)
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH2_EN, 1)
 
     print("PWM2 disabled")
 
