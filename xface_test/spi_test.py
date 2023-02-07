@@ -29,6 +29,7 @@ ADDR_STATUS_A              = 35
 ADDR_BUF_A                 = 26
 ADDR_SPI_ENABLE            = 29
 ADDR_MODE_SELECT           = 28
+ADDR_SETTINGS              = 34
 
 # Protocol version
 PROTOCOL_VERSION            = 1.0               # See which protocol version is used in the Dynamixel
@@ -39,18 +40,19 @@ BAUDRATE                    = 1000000             # Dynamixel default baudrate :
 DEVICENAME                  = '/dev/ttyS2'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
+SPI_SETTINGS                =0b00010000
+txbuf = [1, 2, 3]
 
 SPI_BUF_SIZE                = 64
 SPI_WRITE                   = 2                 # Value for enabling the dac
 SPI_READ                    = 1                 # Value for disabling the dac
 MODE_SPI                    = 35
 
-SETTINGS = 34
+
 
 
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
-
 
 # Open port
 os.system('../rs485  /dev/ttyS2  1')
@@ -71,46 +73,40 @@ else:
     getch()
     quit()
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, SETTINGS, 16)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Settings sent")
+try:
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_SPI)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_SETTINGS, SPI_SETTINGS)
+
+    print("Settings set")
+
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_SPI)
+
     print("Mode selected")
 
-buf = [77, 10, 2, 5, 8]
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(txbuf))
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(buf))
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Mode selected")
+    print("Length set")
 
-dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(buf), buf)
-if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_SPI_ENABLE, SPI_WRITE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Write buffer")
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(txbuf), txbuf)
 
+    print ("TX buffer set:", txbuf)
+
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_SPI_ENABLE, SPI_WRITE)
+
+    print ("Start transmitting")
+
+except KeyboardInterrupt:
 # Close port
-portHandler.closePort()
-
+    portHandler.closePort()
+    print ("Port closed")
