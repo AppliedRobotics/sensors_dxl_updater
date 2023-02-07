@@ -250,6 +250,7 @@ def  usart_read():
 
         print("RX buffer of DEVICE", dev_id - DXL_ID, ":", rxbuf)
 
+    print("")
     if rxbuf == txbuf:
         print("Successful transmit")
     else:
