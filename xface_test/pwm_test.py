@@ -1,4 +1,3 @@
-
 import os
 from socket import timeout
 
@@ -20,13 +19,12 @@ else:
 
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
-
-
 # Control table address
 
-ADDR_BUF_A                 = 26  
-ADDR_DAC_ENABLE            = 29
-ADDR_MODE_SELECT           = 28
+ADDR_BUF_A                  = 26
+ADDR_MODE_SELECT            = 28
+ADDR_CH1_EN                 = 24
+ADDR_CH2_EN                 = 25
 
 # Protocol version
 PROTOCOL_VERSION            = 1.0               # See which protocol version is used in the Dynamixel
@@ -37,11 +35,13 @@ BAUDRATE                    = 1000000             # Dynamixel default baudrate :
 DEVICENAME                  = '/dev/ttyS2'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
+MODE_PWM                 = 33
 
-DAC_BUF_SIZE             = 20
-DAC_ENABLE               = 2                 # Value for enabling the dac
-DAC_DISABLE              = 1                 # Value for disabling the dac
-MODE_DAC                 = 33
+PWM1_DIV                = 8
+PWM2_DIV                = 8
+PWM1_DUTY_CYCLE         = 50
+PWM2_DUTY_CYCLE         = 240
+
 
 ENA1 = 1
 DIS1 = 2
@@ -73,57 +73,53 @@ try:
         getch()
         quit()
 
-    parameters = [7, 100, 8, 100]
+    parameters = [PWM1_DIV, PWM1_DUTY_CYCLE, PWM2_DIV, PWM2_DUTY_CYCLE]
     # Select mode - DAC
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_DAC)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("Mode selected")
+    
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS: 
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_PWM)
 
-    dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, 4, parameters)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("Parameters set")
+    print("Mode selected")
+
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(parameters), parameters)
+
+    print("Parameters set")
 
     # Select mode - DAC
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 24, 2)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("PWM1 enabled")
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 25, 2)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("PWM1 enabled")
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH1_EN, 2)
 
-except KeyBoardInterrupt:
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 24, 1)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("PWM disabled")
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 25, 1)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("PWM disabled")
+    print("PWM1 enabled")
+    
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH2_EN, 2)
+
+    print("PWM2 enabled")
+
+    while True:
+        pass
+
+except KeyboardInterrupt:
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH1_EN, 1)
+
+    print("")
+    print("PWM1 disabled")
+
+    dxl_comm_result = 1
+    while dxl_comm_result != COMM_SUCCESS:
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_CH1_EN, 1)
+
+    print("PWM2 disabled")
 
       
     # Close port
     portHandler.closePort()
+    print ("Port closed")
 

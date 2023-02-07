@@ -37,7 +37,7 @@ def prepare_buf(data_source_1, data_source_2, buf):
                 index2 = 0  
 
 # Control table address
-ADDR_MODE_SELECT           = 28
+ADDR_MODE_SELECT            = 28
 
 # Protocol version
 PROTOCOL_VERSION            = 1.0               # See which protocol version is used in the Dynamixel
@@ -48,11 +48,11 @@ BAUDRATE                    = 1000000           # Dynamixel default baudrate : 1
 DEVICENAME                  = '/dev/ttyS2'           # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
-MODE_DAC                 = 32                   # Value to enable DAC 
-DAC_BUF_SIZE             = 120
+MODE_DAC                = 32                   # Value to enable DAC 
+DAC_BUF_SIZE            = 120
                                                 #Statuses for transmitting audio
-BUF_A_READY              = 250                  #Buffer A is ready to be written
-BUF_B_READY              = 251                  #Buffer B is ready to be written
+BUF_A_READY             = 250                  #Buffer A is ready to be written
+BUF_B_READY             = 251                  #Buffer B is ready to be written
 BOTH_READY              = 252                  #Both buffers are ready to be written
 
 index = 0
@@ -120,9 +120,10 @@ try:
             dacPH.txPacket(portHandler, 251, mixed_buf)
             mixed_buf = []
 except KeyboardInterrupt:
-    print("Good bye!")
     dacPH.return_to_DXL(portHandler)                                #Return to dxl mode and switch off the dac 
     time.sleep(0.5) 
     # Close port
     portHandler.closePort()
+    print("")
+    print("Port closed")
     exit()
