@@ -28,7 +28,7 @@ import datetime
 USART_SETTINGS    = 0b10010000          #SET SETTINGS (use XFace manual)        #
 DEVICE_NUMBER     = 3                   #SET NUMBER OF DEVICES (MIN 1)          #
 txbuf             = [0x01, 0x02, 0x03]  #SET TX BUFFER (any available length)   #
-                                                                                #            
+                                                                                #
 #################################################################################
 
 

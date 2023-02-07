@@ -19,6 +19,17 @@ else:
 
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
+
+############################ USER SCRIPT SETTINGS ###############################
+#################################################################################
+                                                                                #
+PWM1_DIV                = 8 #Frequency divider for PWM channel 1                #
+PWM2_DIV                = 8 #Frequency divider for PWM channel 2                #
+PWM1_DUTY_CYCLE         = 50 #Duty cycle for PWM channel 1                      #
+PWM2_DUTY_CYCLE         = 240 #Duty cycle for PWM channel 2                     #
+                                                                                #
+#################################################################################
+
 # Control table address
 
 ADDR_BUF_A                  = 26

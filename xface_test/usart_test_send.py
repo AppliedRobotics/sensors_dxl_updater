@@ -71,51 +71,41 @@ else:
     getch()
     quit()
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_USART)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Mode selected")
+dxl_comm_result = 1
+while dxl_comm_result != COMM_SUCCESS:
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MODE_SELECT, MODE_USART)
+
+print("Mode selected")
 
 time.sleep(0.5)
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, SETTINGS, 0b10001000)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Settings installed")
+dxl_comm_result = 1
+while dxl_comm_result != COMM_SUCCESS:
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, SETTINGS, 0b10001000)
+
+print("Settings installed")
 
 time.sleep(0.5)
 
 buf = [1, 2, 3]
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(buf))
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Length sent")
+dxl_comm_result = 1
+while dxl_comm_result != COMM_SUCCESS:
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_DATA_LENGTH, len(buf))
 
-dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(buf), buf)
-if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-            print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("buf sent")
+print("Length sent")
 
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_USART_ENABLE, 2)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Write buffer")
+dxl_comm_result = 1
+while dxl_comm_result != COMM_SUCCESS:
+    dxl_comm_result, dxl_error = packetHandler.writeTxRx(portHandler, DXL_ID, ADDR_BUF_A, len(buf), buf)
+
+print("buf sent")
+
+dxl_comm_result = 1
+while dxl_comm_result != COMM_SUCCESS:
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_USART_ENABLE, 2)
+
+print("Write buffer")
 
 # Close port
 portHandler.closePort()

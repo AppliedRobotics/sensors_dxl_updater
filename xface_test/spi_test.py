@@ -22,6 +22,14 @@ from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 import datetime
 
 
+############################ USER SCRIPT SETTINGS ###############################
+#################################################################################
+                                                                                #
+SPI_SETTINGS      = 0b00010000         #SET SETTINGS (use XFace manual)         #
+txbuf             = [0x01, 0x02, 0x03]  #SET TX BUFFER (any available length)   #
+                                                                                #
+#################################################################################
+
 
 # Control table address
 ADDR_DATA_LENGTH           = 25
@@ -39,9 +47,6 @@ DXL_ID                      = 161                 # Dynamixel ID : 1
 BAUDRATE                    = 1000000             # Dynamixel default baudrate : 1000000
 DEVICENAME                  = '/dev/ttyS2'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
-
-SPI_SETTINGS                =0b00010000
-txbuf = [1, 2, 3]
 
 SPI_BUF_SIZE                = 64
 SPI_WRITE                   = 2                 # Value for enabling the dac
